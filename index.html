@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSVクリーニング＆照合ツール（無料・ブラウザ完結）</title>
+<meta name="description" content="CSVの重複削除・空白整理・空行削除と、2つのCSVのキー照合ができる無料ツール。ファイルはブラウザの外に送信されません。">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; margin: 0; background: #f6f7f9; color: #222; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 8px 0 4px; }
+  .sub { color: #555; font-size: 13px; margin-bottom: 20px; }
+  section { background: #fff; border: 1px solid #dde1e6; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  h2 { font-size: 16px; margin: 0 0 10px; }
+  label { font-size: 13px; }
+  input[type="file"] { display: block; margin: 8px 0; }
+  select, button { font-size: 14px; padding: 6px 10px; margin: 4px 4px 4px 0; }
+  button { background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+  button:disabled { background: #9db8ee; cursor: not-allowed; }
+  button.secondary { background: #e5e9f0; color: #222; }
+  .meta { font-size: 12px; color: #555; min-height: 16px; }
+  .tablewrap { overflow: auto; max-height: 320px; border: 1px solid #e3e6ea; border-radius: 6px; margin-top: 8px; }
+  table { border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+  th, td { border: 1px solid #e3e6ea; padding: 4px 8px; text-align: left; }
+  th { background: #f0f2f5; position: sticky; top: 0; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .note { font-size: 12px; color: #555; }
+  .err { color: #b91c1c; font-size: 13px; min-height: 16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>CSVクリーニング＆照合ツール</h1>
+  <p class="sub">CSVの重複削除・空白整理・空行削除と、2つのCSVのキー照合ができます。読み込んだファイルはこのブラウザの中だけで処理され、外部に送信されることはありません。</p>
+
+  <section>
+    <h2>1. CSVを読み込む</h2>
+    <div class="row">
+      <div>
+        <label for="fileA">ファイルA（メイン）</label>
+        <input type="file" id="fileA" accept=".csv,text/csv">
+      </div>
+      <div>
+        <label for="fileB">ファイルB（照合用・任意）</label>
+        <input type="file" id="fileB" accept=".csv,text/csv">
+      </div>
+      <div>
+        <label for="encoding">文字コード</label><br>
+        <select id="encoding">
+          <option value="utf-8">UTF-8</option>
+          <option value="shift-jis">Shift_JIS（ExcelのCSVなど）</option>
+        </select>
+      </div>
+    </div>
+    <p class="err" id="loadError"></p>
+    <p class="meta" id="metaA"></p>
+    <div class="tablewrap" id="previewA" hidden></div>
+    <p class="meta" id="metaB"></p>
+    <div class="tablewrap" id="previewB" hidden></div>
+  </section>
+
+  <section>
+    <h2>2. クリーニング（ファイルA）</h2>
+    <div class="row">
+      <button id="btnTrim" disabled>空白を整理（前後の空白・全角空白を除去）</button>
+      <button id="btnEmpty" disabled>空行を削除</button>
+      <button id="btnDedupe" disabled>重複行を削除</button>
+      <button id="btnDownloadA" class="secondary" disabled>結果をCSVでダウンロード</button>
+    </div>
+    <p class="meta" id="cleanLog"></p>
+  </section>
+
+  <section>
+    <h2>3. 照合（AとBをキー列で突き合わせ）</h2>
+    <div class="row">
+      <label for="keyA">Aのキー列</label>
+      <select id="keyA" disabled></select>
+      <label for="keyB">Bのキー列</label>
+      <select id="keyB" disabled></select>
+      <button id="btnCollate" disabled>照合する</button>
+    </div>
+    <p class="meta" id="collateLog"></p>
+    <div class="row">
+      <button id="btnOnlyA" class="secondary" disabled>Aにだけある行をダウンロード</button>
+      <button id="btnBoth" class="secondary" disabled>両方にある行（A側）をダウンロード</button>
+      <button id="btnOnlyB" class="secondary" disabled>Bにだけある行をダウンロード</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Excelの作業で困ったら</h2>
+    <p class="note">
+      数式の作り方、エラーの直し方、VBAマクロの生成は、無料の専門ボット
+      <a href="https://poe.com/ExcelJissenJP" target="_blank" rel="noopener">Excel実務アシスタント（Poe）</a>
+      に日本語で相談できます。回答はコピペできる完成形＋手順で返ってきます。
+    </p>
+  </section>
+
+  <section>
+    <h2>使い方・注意</h2>
+    <p class="note">
+      ・1行目をヘッダー（列名）として扱います。カンマ・タブ区切りに対応し、ダブルクォートで囲まれたセル内のカンマや改行も正しく読みます。<br>
+      ・照合はキー列の値を文字列として完全一致で比べます。空白整理をしてから照合すると、表記ゆれによる不一致を減らせます。<br>
+      ・ダウンロードするCSVは UTF-8（BOM付き）で、Excelでそのまま開けます。<br>
+      ・大きなファイルではブラウザの動作が重くなる場合があります。まずは小さなファイルでお試しください。
+    </p>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* ===== コアロジック（テスト対象） ===== */
+
+// CSVテキストを2次元配列に変換する。区切り文字はカンマまたはタブ（自動判定）。
+function parseCSV(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const firstLine = text.slice(0, text.indexOf("\n") === -1 ? text.length : text.indexOf("\n"));
+  const delim = (firstLine.split("\t").length > firstLine.split(",").length) ? "\t" : ",";
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else if (c === '"') {
+      inQuotes = true;
+    } else if (c === delim) {
+      row.push(field); field = "";
+    } else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(field); field = "";
+      rows.push(row); row = [];
+    } else field += c;
+  }
+  if (field !== "" || row.length > 0) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+// 2次元配列をCSVテキストに変換する（UTF-8 BOM付き、Excel互換）。
+function toCSV(rows) {
+  const esc = (v) => {
+    const s = String(v == null ? "" : v);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  return "\uFEFF" + rows.map(r => r.map(esc).join(",")).join("\r\n") + "\r\n";
+}
+
+// 全セルの前後の空白（半角・全角）を除去する。
+function trimAll(rows) {
+  return rows.map(r => r.map(v => String(v).replace(/^[\s\u3000]+|[\s\u3000]+$/g, "")));
+}
+
+// 完全に空の行（全セルが空文字）を除去する。
+function removeEmptyRows(rows) {
+  return rows.filter(r => r.some(v => String(v) !== ""));
+}
+
+// 重複行を除去する（先に現れた行を残す）。ヘッダー行は対象外として保持する。
+function dedupeRows(rows, hasHeader) {
+  const seen = new Set();
+  const out = [];
+  rows.forEach((r, idx) => {
+    if (hasHeader && idx === 0) { out.push(r); return; }
+    const key = r.join("\u0000");
+    if (!seen.has(key)) { seen.add(key); out.push(r); }
+  });
+  return out;
+}
+
+// AとBをキー列で照合する。戻り値： { onlyA, both, onlyB }（各要素は行の配列、ヘッダーなし）
+function collate(rowsA, rowsB, keyIdxA, keyIdxB) {
+  const dataA = rowsA.slice(1), dataB = rowsB.slice(1);
+  const keysB = new Set(dataB.map(r => String(r[keyIdxB])));
+  const keysA = new Set(dataA.map(r => String(r[keyIdxA])));
+  return {
+    onlyA: dataA.filter(r => !keysB.has(String(r[keyIdxA]))),
+    both: dataA.filter(r => keysB.has(String(r[keyIdxA]))),
+    onlyB: dataB.filter(r => !keysA.has(String(r[keyIdxB])))
+  };
+}
+
+/* ===== UI ===== */
+const state = { A: null, B: null, collateResult: null };
+const $ = (id) => document.getElementById(id);
+
+function renderPreview(el, rows) {
+  if (!rows || rows.length === 0) { el.hidden = true; el.innerHTML = ""; return; }
+  const maxRows = 50;
+  const head = rows[0];
+  let html = "<table><thead><tr>" + head.map(h => "<th>" + escapeHtml(h) + "</th>").join("") + "</tr></thead><tbody>";
+  rows.slice(1, maxRows + 1).forEach(r => {
+    html += "<tr>" + head.map((_, i) => "<td>" + escapeHtml(r[i] == null ? "" : r[i]) + "</td>").join("") + "</tr>";
+  });
+  html += "</tbody></table>";
+  if (rows.length - 1 > maxRows) html += '<p class="note">プレビューは先頭' + maxRows + '行まで（全' + (rows.length - 1) + '行）</p>';
+  el.innerHTML = html;
+  el.hidden = false;
+}
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function refreshUI() {
+  const hasA = !!state.A, hasB = !!state.B;
+  ["btnTrim", "btnEmpty", "btnDedupe", "btnDownloadA"].forEach(id => $(id).disabled = !hasA);
+  $("keyA").disabled = !hasA; $("keyB").disabled = !hasB;
+  $("btnCollate").disabled = !(hasA && hasB);
+  if (hasA) {
+    $("metaA").textContent = "ファイルA：" + (state.A.length - 1) + "行 × " + (state.A[0] ? state.A[0].length : 0) + "列";
+    renderPreview($("previewA"), state.A);
+    fillKeySelect($("keyA"), state.A[0]);
+  }
+  if (hasB) {
+    $("metaB").textContent = "ファイルB：" + (state.B.length - 1) + "行 × " + (state.B[0] ? state.B[0].length : 0) + "列";
+    renderPreview($("previewB"), state.B);
+    fillKeySelect($("keyB"), state.B[0]);
+  }
+}
+function fillKeySelect(sel, header) {
+  const cur = sel.value;
+  sel.innerHTML = "";
+  (header || []).forEach((h, i) => {
+    const opt = document.createElement("option");
+    opt.value = String(i);
+    opt.textContent = (i + 1) + "列目：" + h;
+    sel.appendChild(opt);
+  });
+  if (cur !== "" && sel.querySelector('option[value="' + cur + '"]')) sel.value = cur;
+}
+function readFile(input, which) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const enc = $("encoding").value;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const rows = parseCSV(String(reader.result || ""));
+      if (rows.length === 0) throw new Error("empty");
+      state[which] = rows;
+      state.collateResult = null;
+      ["btnOnlyA", "btnBoth", "btnOnlyB"].forEach(id => $(id).disabled = true);
+      $("loadError").textContent = "";
+      refreshUI();
+    } catch (e) {
+      $("loadError").textContent = "ファイルを読み取れませんでした。CSV形式と文字コードを確認してください。";
+    }
+  };
+  reader.onerror = () => { $("loadError").textContent = "ファイルの読み込みに失敗しました。"; };
+  reader.readAsText(file, enc);
+}
+function download(name, rows) {
+  const blob = new Blob([toCSV(rows)], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+$("fileA").addEventListener("change", () => readFile($("fileA"), "A"));
+$("fileB").addEventListener("change", () => readFile($("fileB"), "B"));
+$("btnTrim").addEventListener("click", () => {
+  const before = state.A.length;
+  state.A = trimAll(state.A);
+  $("cleanLog").textContent = "空白を整理しました（" + before + "行のまま、全セルの前後空白を除去）。";
+  refreshUI();
+});
+$("btnEmpty").addEventListener("click", () => {
+  const before = state.A.length;
+  state.A = removeEmptyRows(state.A);
+  $("cleanLog").textContent = "空行を削除しました：" + before + "行 → " + state.A.length + "行";
+  refreshUI();
+});
+$("btnDedupe").addEventListener("click", () => {
+  const before = state.A.length;
+  state.A = dedupeRows(state.A, true);
+  $("cleanLog").textContent = "重複行を削除しました：" + before + "行 → " + state.A.length + "行";
+  refreshUI();
+});
+$("btnDownloadA").addEventListener("click", () => download("cleaned.csv", state.A));
+$("btnCollate").addEventListener("click", () => {
+  const res = collate(state.A, state.B, Number($("keyA").value), Number($("keyB").value));
+  state.collateResult = res;
+  $("collateLog").textContent = "照合結果：Aにだけある行 " + res.onlyA.length + "件／両方にある行 " + res.both.length + "件／Bにだけある行 " + res.onlyB.length + "件";
+  $("btnOnlyA").disabled = res.onlyA.length === 0;
+  $("btnBoth").disabled = res.both.length === 0;
+  $("btnOnlyB").disabled = res.onlyB.length === 0;
+});
+$("btnOnlyA").addEventListener("click", () => download("only_in_A.csv", [state.A[0]].concat(state.collateResult.onlyA)));
+$("btnBoth").addEventListener("click", () => download("in_both.csv", [state.A[0]].concat(state.collateResult.both)));
+$("btnOnlyB").addEventListener("click", () => download("only_in_B.csv", [state.B[0]].concat(state.collateResult.onlyB)));
+</script>
+</body>
+</html>
