@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>使い方ガイド｜CSVクリーニング＆照合ツール</title>
+<meta name="description" content="CSVクリーニング＆照合ツールの使い方を手順ごとに解説。重複削除・空白整理・空行削除と、2つのCSVのキー照合の流れ。">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; margin: 0; background: #f6f7f9; color: #222; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 8px 0 4px; }
+  .sub { color: #555; font-size: 13px; margin-bottom: 20px; }
+  section { background: #fff; border: 1px solid #dde1e6; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  h2 { font-size: 16px; margin: 0 0 10px; }
+  nav { font-size: 13px; margin-bottom: 16px; }
+  nav a { color: #2563eb; margin-right: 12px; }
+  p, li { font-size: 14px; line-height: 1.8; }
+  .note { font-size: 12px; color: #555; }
+  ol { padding-left: 20px; }
+</style>
+</head>
+<body>
+<main>
+  <nav><a href="index.html">ツールTOP</a><a href="guide.html">使い方ガイド</a><a href="examples.html">活用例</a><a href="faq.html">よくある質問</a><a href="about.html">このツールについて</a></nav>
+  <h1>使い方ガイド</h1>
+  <p class="sub">CSVクリーニング＆照合ツールの使い方を、手順ごとに解説します。ファイルはブラウザの中だけで処理され、外部サーバーには送信されません。</p>
+
+  <section>
+    <h2>手順1：CSVを読み込む</h2>
+    <ol>
+      <li>「ファイルA（メイン）」に、整理したいCSVを選びます。1行目がヘッダー（列名）として扱われます。</li>
+      <li>2つのCSVを突き合わせたい場合は、「ファイルB（照合用・任意）」にもCSVを選びます。</li>
+      <li>文字コードを選びます。Excelで保存したCSVは Shift_JIS、Google スプレッドシートなどから書き出したCSVは UTF-8 が一般的です。文字化けしたら、もう一方の文字コードで読み込み直してください。</li>
+    </ol>
+    <p class="note">対応する区切り文字はカンマとタブです。ダブルクォートで囲まれたセル内のカンマや改行も正しく読み取ります。</p>
+  </section>
+
+  <section>
+    <h2>手順2：クリーニングする（ファイルA）</h2>
+    <ol>
+      <li><strong>空白を整理</strong>：全セルの前後にある半角・全角の空白を除去します。照合の前に行うと、表記ゆれによる不一致を減らせます。</li>
+      <li><strong>空行を削除</strong>：セルがすべて空の行を除去します。</li>
+      <li><strong>重複行を削除</strong>：内容が完全に同じ行を1つにまとめます。先に現れた行が残り、ヘッダー行は対象外です。</li>
+      <li><strong>結果をCSVでダウンロード</strong>：整理後のCSVをダウンロードします。UTF-8（BOM付き）なので、Excelでそのまま開けます。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>手順3：照合する（AとBをキー列で突き合わせ）</h2>
+    <ol>
+      <li>Aのキー列とBのキー列をそれぞれ選びます（例：両方の「予約番号」列）。</li>
+      <li>「照合する」を押すと、「Aにだけある行」「両方にある行」「Bにだけある行」の件数が表示されます。</li>
+      <li>必要な結果だけをCSVでダウンロードできます。未入金の予約だけ抜き出したい場合は「Aにだけある行」、両方に登録がある顧客だけ確認したい場合は「両方にある行」を使います。</li>
+    </ol>
+    <p class="note">照合はキー列の値を文字列として完全一致で比べます。「001」と「1」は別物として扱われるので、事前に空白整理や表記統一をしておくのがコツです。</p>
+  </section>
+
+  <section>
+    <h2>つまずきやすいポイント</h2>
+    <ul>
+      <li>文字化けする → 文字コードを UTF-8 / Shift_JIS で切り替えてみてください。</li>
+      <li>照合で思ったより不一致が多い → キー列の前後に空白が残っていないか確認し、「空白を整理」を先に実行してください。</li>
+      <li>ファイルが大きくて重い → まずは小さなファイルで動作を確認し、不要な列を削ってから読み込むと軽くなります。</li>
+    </ul>
+    <p class="note">詳しくは<a href="faq.html">よくある質問</a>もご覧ください。実際の使い道は<a href="examples.html">活用例</a>にまとめています。</p>
+  </section>
+</main>
+</body>
+</html>

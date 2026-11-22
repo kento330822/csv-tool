@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>よくある質問｜CSVクリーニング＆照合ツール</title>
+<meta name="description" content="CSVクリーニング＆照合ツールのよくある質問。料金、ファイルの安全性、対応形式、文字化け、ファイルサイズについて。">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; margin: 0; background: #f6f7f9; color: #222; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 8px 0 4px; }
+  .sub { color: #555; font-size: 13px; margin-bottom: 20px; }
+  section { background: #fff; border: 1px solid #dde1e6; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  h2 { font-size: 16px; margin: 0 0 10px; }
+  nav { font-size: 13px; margin-bottom: 16px; }
+  nav a { color: #2563eb; margin-right: 12px; }
+  p, li { font-size: 14px; line-height: 1.8; }
+  .note { font-size: 12px; color: #555; }
+</style>
+</head>
+<body>
+<main>
+  <nav><a href="index.html">ツールTOP</a><a href="guide.html">使い方ガイド</a><a href="examples.html">活用例</a><a href="faq.html">よくある質問</a><a href="about.html">このツールについて</a></nav>
+  <h1>よくある質問</h1>
+  <p class="sub">CSVクリーニング＆照合ツールについての、よくある質問と回答です。</p>
+
+  <section>
+    <h2>Q. 無料で使えますか？会員登録は必要ですか？</h2>
+    <p>A. 無料で使えます。会員登録やログインは不要で、開いたそのまま使えます。</p>
+  </section>
+
+  <section>
+    <h2>Q. 読み込んだCSVはどこかに送信されますか？</h2>
+    <p>A. 送信されません。読み込んだファイルはお使いのブラウザの中だけで処理され、外部サーバーにはアップロードされません。ブラウザを閉じればデータは残りません。</p>
+  </section>
+
+  <section>
+    <h2>Q. どんなCSVに対応していますか？</h2>
+    <p>A. カンマ区切りとタブ区切りに対応しています。1行目をヘッダー（列名）として扱います。ダブルクォートで囲まれたセル内のカンマや改行も正しく読み取ります。文字コードは UTF-8 と Shift_JIS が選べます。</p>
+  </section>
+
+  <section>
+    <h2>Q. 文字化けしてしまいます</h2>
+    <p>A. 読み込み時の文字コードを切り替えてください。Excelで保存したCSVは Shift_JIS、Google スプレッドシートなどから書き出したCSVは UTF-8 のことが多いです。ダウンロードされる結果は UTF-8（BOM付き）なので、Excelでそのまま開けます。</p>
+  </section>
+
+  <section>
+    <h2>Q. 照合で「不一致」が多く出ます</h2>
+    <p>A. 照合はキー列の値を文字列として完全一致で比べます。「001」と「1」は別物として扱われます。先に「空白を整理」を実行してから照合すると、空白による見かけの不一致を減らせます。表記ゆれ（全角・半角など）がある場合は、元のファイル側で表記をそろえてから読み込むのが確実です。</p>
+  </section>
+
+  <section>
+    <h2>Q. 大きなファイルも扱えますか？</h2>
+    <p>A. 処理はすべてブラウザで行うため、ファイルが大きいと動作が重くなる場合があります。まずは小さなファイルでお試しください。不要な列を削ってから読み込むと軽くなります。</p>
+  </section>
+
+  <section>
+    <h2>Q. スマホでも使えますか？</h2>
+    <p>A. ブラウザで開ける端末なら使えます。ただしファイルの選択や表の確認は、画面の大きいPCの方が操作しやすいです。</p>
+  </section>
+
+  <section>
+    <h2>Q. Excelのマクロや数式の相談もできますか？</h2>
+    <p>A. このツール自体はCSVの整理・照合専用です。数式の作り方、エラーの直し方、VBAマクロの生成は、無料の専門ボット <a href="https://poe.com/ExcelJissenJP" target="_blank" rel="noopener">Excel実務アシスタント（Poe）</a> に日本語で相談できます。</p>
+  </section>
+</main>
+</body>
+</html>
